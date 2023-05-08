@@ -4,12 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RevisendAPI.Data;
 using RevisendAPI.Data.Entities;
+using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddDbContext<RevisendAPIContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConn")));
 builder.Services.AddDbContext<RevisendAPIDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConn"));
@@ -71,7 +74,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

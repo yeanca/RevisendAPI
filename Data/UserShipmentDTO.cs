@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RevisendAPI.Data
 {
-    public partial class Shipment
+    public partial class UserShipmentDTO
     {
         public int ShipmentNo { get; set; }
         public int ByUser { get; set; }
@@ -14,8 +14,6 @@ namespace RevisendAPI.Data
         public DateTime? DateReceived { get; set; }
         public DateTime? DateDelivered { get; set; }
         public DateTime? DateEta { get; set; }
-        public int? Status { get; set; }
-
-        public virtual ShipmentStatus ShipmentStatus { get; set; }
+        public string Status { get; set; }
     }
 }

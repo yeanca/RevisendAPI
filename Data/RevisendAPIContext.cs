@@ -25,14 +25,14 @@ namespace RevisendAPI.Data
         public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<ReviAddress> ReviAddresses { get; set; } = null!;
         public virtual DbSet<Shipment> Shipments { get; set; } = null!;
+        public virtual DbSet<ShipmentStatus> ShipmentStatuses { get; set; } = null!;
         public virtual DbSet<UserAddress> UserAddresses { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=Revisend; user=godmode; password=godmode;Trusted_Connection=True;");
+
             }
         }
 
@@ -153,7 +153,18 @@ namespace RevisendAPI.Data
 
                 entity.Property(e => e.SourceStore).HasMaxLength(50);
 
-                entity.Property(e => e.Status).HasMaxLength(50);
+                entity.HasOne(d => d.ShipmentStatus)
+                    .WithMany(p => p.Shipments)
+                    .HasForeignKey(d => d.Status);
+            });
+
+            modelBuilder.Entity<ShipmentStatus>(entity =>
+            {
+                entity.HasKey(e => e.StatusId);
+
+                entity.ToTable("ShipmentStatus");
+
+                entity.Property(e => e.Status).HasMaxLength(250);
             });
 
             modelBuilder.Entity<UserAddress>(entity =>
