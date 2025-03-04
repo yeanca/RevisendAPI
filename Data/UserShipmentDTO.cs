@@ -14,6 +14,7 @@ namespace RevisendAPI.Data
         public DateTime? DateReceived { get; set; }
         public DateTime? DateDelivered { get; set; }
         public DateTime? DateEta { get; set; }
-        public string Status { get; set; }
+        public int? StatusId { get; set; }
+        public string? Status { get; set; }
     }
 }

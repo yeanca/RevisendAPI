@@ -45,16 +45,16 @@ namespace RevisendAPI.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Email = model.Email,
-                    UserName= model.UserName,
-                    AppId = long.Parse(DateTime.Now.ToString("yyyyMMddHHmmss")),
+                    UserName=model.Username,
+                    AppId = int.Parse(DateTime.Now.ToString("MMddHHmmss")),
                 };
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user,model.Password);
                 if (result.Succeeded)
                 {
-                    var tempUser = await _userManager.FindByNameAsync(model.UserName);
-                    //await _context.SaveChangesAsync();
+                    var tempUser = await _userManager.FindByEmailAsync(model.Email);
+                    await _context.SaveChangesAsync();
                     //await _userManager.AddToRoleAsync(user, model.Role);
-                    return await Task.FromResult(new ResponseModel(ResponseCode.OK, "Registration Successful", new UserDTO(userId: tempUser.Id, appId: tempUser.AppId, userName: tempUser.UserName, firstName: tempUser.FirstName, lastName:tempUser?.LastName, email: tempUser?.Email, model.Role,"token here")));
+                    return await Task.FromResult(new ResponseModel(ResponseCode.OK, "Registration Successful", new UserDTO(userId: tempUser.Id, appId: tempUser.AppId, firstName: tempUser.FirstName, lastName:tempUser?.LastName, email: tempUser?.Email)));
                 }
                 return await Task.FromResult(new ResponseModel(ResponseCode.Error, "", result.Errors.Select(x => x.Description).ToArray()));
             }
@@ -68,15 +68,15 @@ namespace RevisendAPI.Controllers
 
         //register a user with google
         [HttpPost("RegisterEx")]
-        public async Task<object> ExternalLogin(string provider,string returnUrl)
+        public async Task<object> ExternalLogin([FromBody] ExternalReg model)
         {
             try
             {
-                var redirectUrl = Url.Action("ExternalLoginCallback", "Account",new { ReturnUrl = returnUrl });
+                var redirectUrl = Url.Action("ExternalLoginCallback", "Account",new { ReturnUrl = model.ReturnUrl });
 
-                var properties =_signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                var properties =_signInManager.ConfigureExternalAuthenticationProperties(model.Provider, redirectUrl);
 
-                return new ChallengeResult(provider, properties);
+                return new ChallengeResult(model.Provider, properties);
             }
             catch (Exception)
             {
@@ -92,13 +92,13 @@ namespace RevisendAPI.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, true, false);
+                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, true, false);
                     if (result.Succeeded)
                     {
-                        var userF = await _userManager.FindByNameAsync(model.UserName);
+                        var userF = await _userManager.FindByNameAsync(model.Email);
                         var role = (await _userManager.GetRolesAsync(userF)).FirstOrDefault();
-                        var user = new UserDTO(userId: userF.Id, appId: userF.AppId, userName: userF.UserName, firstName: userF.FirstName, lastName: userF?.LastName, email: userF?.Email, role,"token");
-                        user.Token = GenerateToken(userF, role);
+                        var user = new UserDTO(userId: userF.Id, appId: userF.AppId, firstName: userF.FirstName, lastName: userF?.LastName, email: userF?.Email);
+                        //user.Token = GenerateToken(userF, role);
                         return await Task.FromResult(new ResponseModel(ResponseCode.OK, "Login Successful!", user));
                     }
                 }
